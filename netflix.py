@@ -12,16 +12,16 @@ netflix_list={}
 all_movie_list=[]
 for line in f:
     data = line.strip().split(',')
-    data[0]=int(data[0].strip())
+    data[1]=int(data[1].strip())
     #print data[0]
-    all_movie_list.append(int(data[1]))
-    if data[0] not in netflix_list.keys():
-        netflix_list[data[0]]={int(data[1]):int(data[2])}
+    all_movie_list.append(int(data[0]))
+    if data[1] not in netflix_list.keys():
+        netflix_list[data[1]]={int(data[0]):int(data[2])}
     else:
-        netflix_list[data[0]].update({int(data[1]):int(data[2])})
+        netflix_list[data[1]].update({int(data[0]):int(data[2])})
     #print data[0] + " " + data[1] + " " + data[2]
 
-#print netflix_list[14518]
+print "You are here"
 
 
 '''
@@ -52,8 +52,8 @@ def calculate_similarity(user1,user2):
 
 #print calculate_similarity(13759,8210)
 
-#Calculate similarity based on pearson coeffiecient
 
+#Calculate similarity based on pearson coeffiecient
 def calculate_pearson_coefficient(user1,user2):
     movie_list=[]
     for movie in netflix_list[user1]:
