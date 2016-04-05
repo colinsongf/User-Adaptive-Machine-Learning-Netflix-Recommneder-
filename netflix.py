@@ -21,8 +21,10 @@ for line in f:
         netflix_list[data[0]].update({int(data[1]):int(data[2])})
     #print data[0] + " " + data[1] + " " + data[2]
 
-print netflix_list[14518]
+#print netflix_list[14518]
 
+
+'''
 i=0
 for x,y in netflix_list.items():
     print x
@@ -31,24 +33,9 @@ for x,y in netflix_list.items():
     i+=1
     if i==5:
         break;
-
-#for x in xrange(0,5):
- #   print netflix_list[i]
 '''
-random.shuffle(netflix_list)
-trainData=netflix_list[:40]
-validationData=netflix_list[40:80]
-testData=netflix_list[80:]
 
-i=0
-for x in xrange(0,5):
-    print testData[i]
-    i+=1
-
-#print trainData
-'''
 #Calculate Similarity score based on the eucledian distance.
-
 def calculate_similarity(user1,user2):
     eucledian_distance=[]
     for movie in netflix_list[user1]:
@@ -65,6 +52,8 @@ def calculate_similarity(user1,user2):
 
 #print calculate_similarity(13759,8210)
 
+#Calculate similarity based on pearson coeffiecient
+
 def calculate_pearson_coefficient(user1,user2):
     movie_list=[]
     for movie in netflix_list[user1]:
@@ -74,11 +63,14 @@ def calculate_pearson_coefficient(user1,user2):
 
     movie_count= float(len(movie_list))
     print movie_count
+
 #If they have no ratings in common, return 0
     if movie_count==0.0:
         return 0
+
     sum1=0.0
     sum2=0.0
+
 #Add up all the preferences
     for movie in movie_list:
 	    sum1= sum1+ netflix_list[user1][movie]
@@ -93,19 +85,17 @@ def calculate_pearson_coefficient(user1,user2):
 
     for movie in movie_list:
 	    sum2_squares= sum2+ pow(netflix_list[user2][movie],2)
-    #print sum1
-    #print sum2
+
     product=0.0
+
 #Sum up the products
     for movie in movie_list:
 	    product= product + netflix_list[user1][movie] * netflix_list[user2][movie]
-    #print product
+
     numerator=0.0
     denominator=0.0
     numerator= (product - (sum1*sum2)/movie_count)
-    #print numerator
     denominator=math.sqrt((sum1_squares/movie_count-pow(sum1,2)/movie_count*movie_count)*(sum2_squares/movie_count- pow(sum2,2)/movie_count*movie_count))
-    print denominator
 
     if denominator==0.0:
         return 0
@@ -115,11 +105,11 @@ def calculate_pearson_coefficient(user1,user2):
 #print calculate_pearson_coefficient(13759,10250)
 
 
+#Finding the n users who are most similar to the given user
 def top_similar_users(user,n,function=calculate_pearson_coefficient):
     similarity_scores=[]
     for other_user in netflix_list:
         if other_user!=user:
-            #print(function(user,other_user))
             similarity_scores.append([function(user,other_user),other_user])
 
     similarity_scores.sort()
@@ -127,22 +117,45 @@ def top_similar_users(user,n,function=calculate_pearson_coefficient):
     for x in range(0,n):
         print similarity_scores[x]
 
-    similarity_scores[:n]
+    return similarity_scores[:n]
 
 top_similar_users(17,3)
 
+
 def final_recommendations(user,n,function=top_similar_users):
+    #List of all unique movies
     unique_movies=set(all_movie_list)
+
     temp_list=netflix_list[user]
     user_movies=temp_list.keys()
-    different_movies=[]
-    different_movies=unique_movies-user_movies
 
+    #Holds all the movies not senn by the user
+    different_movies=[]
+    for x in user_movies:
+        unique_movies.remove(x)
+
+   #Find the top 10 similar users based on the pearson coefficient
     similar_users=top_similar_users(user,10)
 
-    for movie in different_movies:
+    recommender_list=[]
+    for movie in unique_movies:
+        similarity_product=0.0
+        rating_total=0.0
         for user in similar_users:
+            if movie in netflix_list[user[1]].keys():
+                similarity_product=similarity_product + user[0]*netflix_list[user[1]][movie]
+                rating_total=netflix_list[user[1]][movie]
+        if similarity_product>0:
+            recommender_list.append([similarity_product/rating_total,movie])
+
+    recommender_list.sort()
+    recommender_list.reverse()
+
+    if n<len(recommender_list):
+        return recommender_list[:n]
+    else:
+        return recommender_list[:len(recommender_list)]
 
 
 
-
+print final_recommendations(13759,3)
